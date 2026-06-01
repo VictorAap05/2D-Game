@@ -120,11 +120,12 @@ export default class HUDManager {
             fontSize:  '22px',
             color:     '#ffffff',
             stroke:    '#000000',
-            strokeThickness: 3
-        }).setOrigin(0.5, 0).setInteractive({ useHandCursor: true }).setAlpha(0.6);
+            strokeThickness: 3,
+            backgroundColor: '#00000066',
+            padding: { left: 20, right: 20, top: 10, bottom: 10 }
+        }).setOrigin(0.5, 0).setInteractive({ useHandCursor: true });
 
         this.pauseBtn.on('pointerdown', () => {
-            // Delega la pausa a la escena activa
             this.scene.events.emit('pauseRequested');
         });
     }
@@ -164,23 +165,73 @@ export default class HUDManager {
         const btnRadius = 40;
         const btnY = height - 80;
 
-        // Izquierda
-        const LEFT  = this._addTouchBtn(80,  btnY, '◀', btnRadius);
-        const RIGHT = this._addTouchBtn(180, btnY, '▶', btnRadius);
+        const joyBase = this.scene.add.circle(100, btnY, 50, 0x000000, 0.4)
+            .setStrokeStyle(3, 0xffffff, 0.8).setScrollFactor(0).setDepth(60);
+        const joyThumb = this.scene.add.circle(100, btnY, 25, 0x00ff88, 0.8)
+            .setScrollFactor(0).setDepth(61);
         
-        // Derecha
-        const SHOOT = this._addTouchBtn(width - 180, btnY, '🔥', btnRadius);
-        const JUMP  = this._addTouchBtn(width - 80,  btnY, '▲', btnRadius);
+        this._uiElements.push(joyBase, joyThumb);
+        this.scene.cameras.main.ignore([joyBase, joyThumb]);
 
-        this._bindTouch(LEFT,  'left');
-        this._bindTouch(RIGHT, 'right');
-        this._bindTouch(JUMP,  'jump');
+        const leftZone = this.scene.add.zone(0, 0, width / 2, height)
+            .setOrigin(0, 0).setScrollFactor(0).setDepth(59).setInteractive();
+        this._uiElements.push(leftZone);
+        this.scene.cameras.main.ignore(leftZone);
+
+        let dragPointer = null;
+
+        leftZone.on('pointerdown', (pointer) => {
+            dragPointer = pointer;
+            joyBase.setPosition(pointer.x, pointer.y);
+            joyThumb.setPosition(pointer.x, pointer.y);
+            this._touchButtons.left = false;
+            this._touchButtons.right = false;
+        });
+
+        leftZone.on('pointermove', (pointer) => {
+            if (dragPointer === pointer) {
+                const distX = pointer.x - joyBase.x;
+                const distY = pointer.y - joyBase.y;
+                const dist = Math.sqrt(distX * distX + distY * distY);
+                const maxDist = 40;
+
+                if (dist > maxDist) {
+                    const angle = Math.atan2(distY, distX);
+                    joyThumb.setPosition(joyBase.x + Math.cos(angle) * maxDist, joyBase.y + Math.sin(angle) * maxDist);
+                } else {
+                    joyThumb.setPosition(pointer.x, pointer.y);
+                }
+
+                this._touchButtons.left = (joyThumb.x < joyBase.x - 10);
+                this._touchButtons.right = (joyThumb.x > joyBase.x + 10);
+            }
+        });
+
+        const resetJoystick = (pointer) => {
+            if (dragPointer === pointer) {
+                dragPointer = null;
+                const rY = this.scene.scale.height - 80;
+                joyBase.setPosition(100, rY);
+                joyThumb.setPosition(100, rY);
+                this._touchButtons.left = false;
+                this._touchButtons.right = false;
+            }
+        };
+
+        leftZone.on('pointerup', resetJoystick);
+        leftZone.on('pointerout', resetJoystick);
+        leftZone.on('pointercancel', resetJoystick);
+
+        const SHOOT = this._createCircleBtn(width - 180, btnY, '🔥', btnRadius);
+        const JUMP  = this._createCircleBtn(width - 80,  btnY, '▲', btnRadius);
+
         this._bindTouch(SHOOT, 'shoot');
+        this._bindTouch(JUMP,  'jump');
 
-        this._touchEls = [LEFT, RIGHT, JUMP, SHOOT];
+        this._touchEls = [joyBase, joyThumb, leftZone, SHOOT, JUMP];
     }
 
-    _addTouchBtn(x, y, label, radius) {
+    _createCircleBtn(x, y, label, radius) {
         const container = this.scene.add.container(x, y).setScrollFactor(0).setDepth(60).setAlpha(0.5);
         
         const bg = this.scene.add.circle(0, 0, radius, 0x000000, 0.6)
@@ -249,11 +300,12 @@ export default class HUDManager {
 
         // Reposicionar controles táctiles
         const btnY = height - 80;
-        if (this._touchEls.length >= 4) {
-            this._touchEls[0].setPosition(80, btnY);
-            this._touchEls[1].setPosition(180, btnY);
-            this._touchEls[2].setPosition(width - 80, btnY);
+        if (this._touchEls.length >= 5) {
+            this._touchEls[0].setPosition(100, btnY);
+            this._touchEls[1].setPosition(100, btnY);
+            this._touchEls[2].setSize(width / 2, height);
             this._touchEls[3].setPosition(width - 180, btnY);
+            this._touchEls[4].setPosition(width - 80, btnY);
         }
     }
 
