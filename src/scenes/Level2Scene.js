@@ -1,51 +1,27 @@
-import BaseScene from './BaseScene';
+import BaseScene from './BaseScene.js';
 
-/*
-=============================================
-NIVEL 2
-Igual que Level1Scene pero para el mapa 2.
-=============================================
-*/
+/**
+ * Level2Scene
+ * Nivel 2. Usa el mismo mapa que el nivel 3 como fallback
+ * hasta que se añada mapa2.json al proyecto.
+ */
 export default class Level2Scene extends BaseScene {
 
     constructor() {
         super('Level2Scene');
-        this.mapKey    = 'map2';   // cambia al key real cuando exista mapa2.json
+        this.mapKey    = 'map3';   // reutilizamos mapa3 hasta que exista mapa2
         this.levelName = 'Level2Scene';
+        this.levelNum  = 2;
+        this.nextLevel = 'Level3Scene';
         this.spawnX    = 100;
         this.spawnY    = 300;
     }
 
     create() {
-
-        this.createMap();
-        this.createPlayer();
-
-        this.physics.add.collider(this.player, this.layer);
-
-        this.createBombs();
-
-        if (this.bombs) {
-            this.physics.add.overlap(
-                this.player,
-                this.bombs,
-                this.activateBomb,
-                null,
-                this
-            );
-        }
-
-        this.setupCamera();
-        this.setupInput();
-        this.createAnimations();
-        this.createHUD();
-
-        this.cameras.main.fadeIn(500, 0, 0, 0);
+        super.create();
     }
 
     update() {
-
-        this.handlePlayerMovement();
-        this.handleTileEffects();
+        super.update();
     }
 }
