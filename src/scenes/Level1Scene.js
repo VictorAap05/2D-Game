@@ -13,7 +13,7 @@ export default class Level1Scene extends BaseScene {
         this.mapKey    = 'map1';
         this.levelName = 'Level1Scene';
         this.levelNum  = 1;
-        this.nextLevel = 'Level3Scene';
+        this.nextLevel = 'Level2Scene';
         this.spawnX    = 100;
         this.spawnY    = 300;
     }
