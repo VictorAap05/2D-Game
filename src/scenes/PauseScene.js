@@ -10,7 +10,11 @@ export default class PauseScene extends Phaser.Scene {
         this._audio    = data.audio    ?? null;
     }
 
-    create() {
+create() {
+        
+        // Obliga a la escena de Pausa a renderizarse por encima de cualquier otro nivel o fondo
+        this.scene.bringToTop();
+
         const { width, height } = this.scale;
 
         // Asegurar que la cámara de esta escena esté en (0,0) y no scrollee
@@ -48,7 +52,6 @@ export default class PauseScene extends Phaser.Scene {
         // Fade-in rápido
         this.cameras.main.fadeIn(180, 0, 0, 0);
     }
-
     // ═══════════════════════════════════════════════════════════
     // ACCIONES
     // ═══════════════════════════════════════════════════════════
