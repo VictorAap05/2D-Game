@@ -5,7 +5,7 @@ export default class Level2Scene extends BaseScene {
     constructor() {
         super('Level2Scene');
         this.mapKey    = 'map2';
-        this.levelName = 'Level2Scene';
+        this.levelName = 'Level3Scene';
         this.levelNum  = 2; 
         this.nextLevel = 'MenuScene';   
         this.spawnX    = 100;
