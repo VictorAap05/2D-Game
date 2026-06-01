@@ -16,7 +16,7 @@ export default class GameScene extends Phaser.Scene {
 
         this.load.tilemapTiledJSON(
             'map',
-            'assets/maps/mapa1.json'
+            'assets/maps/mapa3.json'
         );
 
         /*
@@ -25,10 +25,10 @@ export default class GameScene extends Phaser.Scene {
         =====================================
         */
 
-        this.load.image(
-            'tiles',
-            'assets/tiles/spritesheet-tiles-default.png'
-        );
+            this.load.image(
+                'tiles',
+                'assets/tiles/spritesheet-tiles-default.png',
+            );
 
         /*
         =====================================
@@ -41,6 +41,8 @@ export default class GameScene extends Phaser.Scene {
             'assets/player/spritesheet-characters-default.png',
             'assets/player/spritesheet-characters-default.xml'
         );
+        /*
+      ]
     }
 
     create() {
@@ -73,11 +75,40 @@ export default class GameScene extends Phaser.Scene {
         */
 
         const layer = map.createLayer(
-            'Layer1',
+            'Piso',
             tileset,
             0,
             0
         );
+
+        this.layer = layer;
+
+        const bombLayer =
+            map.getObjectLayer('Bombas');
+
+        this.bombs =
+            this.physics.add.staticGroup();
+
+        bombLayer.objects.forEach(obj => {
+
+            const bomb = this.bombs.create(
+                obj.x,
+                obj.y - obj.height,
+                'bomb'
+            );
+
+            bomb.activated = false;
+
+            bomb.explosionRadius =
+                obj.properties.find(
+                    p => p.name === 'explosionRadius'
+                )?.value || 150;
+
+            bomb.explosionDelay =
+                obj.properties.find(
+                    p => p.name === 'explosionDelay'
+                )?.value || 2000;
+        });
 
         /*
         =====================================
@@ -122,7 +153,13 @@ export default class GameScene extends Phaser.Scene {
         CAMARA
         =====================================
         */
-
+        this.physics.add.overlap(
+            this.player,
+            this.bombs,
+            this.activateBomb,
+            null,
+            this
+        );
         this.cameras.main.startFollow(this.player);
 
         this.cameras.main.setBounds(
@@ -189,7 +226,7 @@ export default class GameScene extends Phaser.Scene {
             this.player.anims.play('walk', true);
 
             this.player.setFlipX(false);
-            
+
         }
         else {
 
@@ -206,10 +243,10 @@ export default class GameScene extends Phaser.Scene {
 
         if (
             (this.cursors.up.isDown || this.wasd.up.isDown) &&
-            this.player.body.blocked.down 
+            this.player.body.blocked.down
         ) {
 
-            this.player.setVelocityY(-450);
+            this.player.setVelocityY(-600);
         }
 
         /*
@@ -222,8 +259,78 @@ export default class GameScene extends Phaser.Scene {
 
             this.player.anims.play('jump', true);
         }
+        const tile = this.layer.getTileAtWorldXY(
+            this.player.x,
+            this.player.y
+        );
+
+        if (tile) {
+
+            if (tile.properties.kill) {
+
+                console.log("MUERTO");
+
+                this.player.setPosition(100, 300);
+            }
+
+            if (tile.properties.damage) {
+
+                console.log("DAÑO");
+            }
+
+            if (tile.properties.forceY) {
+
+                this.player.setVelocityY(
+                    tile.properties.forceY
+                );
+            }
+        }
+
+    }
+    activateBomb(player, bomb) {
+
+        if (bomb.activated) return;
+
+        bomb.activated = true;
+
+        this.tweens.add({
+            targets: bomb,
+            alpha: 0.2,
+            duration: 100,
+            yoyo: true,
+            repeat: -1
+        });
+
+        this.time.delayedCall(
+            bomb.explosionDelay,
+            () => this.explodeBomb(bomb)
+        );
     }
 
+    explodeBomb(bomb) {
+
+        const distance =
+            Phaser.Math.Distance.Between(
+                bomb.x,
+                bomb.y,
+                this.player.x,
+                this.player.y
+            );
+
+        if (
+            distance <= bomb.explosionRadius
+        ) {
+
+            console.log('BOOM');
+
+            this.player.setPosition(
+                100,
+                300
+            );
+        }
+
+        bomb.destroy();
+    }
     createAnimations() {
 
         /*
