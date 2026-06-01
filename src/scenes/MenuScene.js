@@ -23,15 +23,12 @@ export default class MenuScene extends Phaser.Scene {
         this.add.rectangle(0, height * 0.88, width, 4, 0x00cc66).setOrigin(0, 0.5);
 
         // ── Título ───────────────────────────────────────────
-        this.add.text(width / 2, height * 0.20, '🎮 2D PLATAFORMA', {
+        this.add.text(width / 2, height * 0.20, 'JUNGLE ALIEN`S', {
             fontSize: '52px', fontStyle: 'bold',
             color: '#00cc66',
             stroke: '#003311', strokeThickness: 6
         }).setOrigin(0.5);
 
-        this.add.text(width / 2, height * 0.32, 'Aventura en plataformas — Phaser.js', {
-            fontSize: '18px', color: '#888888'
-        }).setOrigin(0.5);
 
         // ── High Score ───────────────────────────────────────
         const hs = StorageManager.getHighScore();
@@ -51,20 +48,19 @@ export default class MenuScene extends Phaser.Scene {
             this.scene.start('Level1Scene');
         });
 
-        this._createButton(width / 2, height * 0.66, '▶  NIVEL 2  (beta)', true, () => {
+        this._createButton(width / 2, height * 0.66, '▶  NIVEL 2', true, () => {
             this.scene.start('Level2Scene');
         });
 
-        this._createButton(width / 2, height * 0.76, '▶  NIVEL 3  (completo)', true, () => {
+        this._createButton(width / 2, height * 0.76, '▶  NIVEL 3', true, () => {
             this.scene.start('Level3Scene');
         });
 
         // ── Controles ────────────────────────────────────────
-        this.add.text(width / 2, height * 0.87, [
+        this.add.text(width / 2, height * 0.85, [
             '⌨️  ← → / WASD  mover   |   W / ↑  saltar   |   ESPACIO  disparar   |   ESC  pausa',
-            '📱  Botones táctiles en pantalla para móvil'
         ].join('\n'), {
-            fontSize: '14px', color: '#555555', align: 'center'
+            fontSize: '14px', color: '#ffffff', align: 'center'
         }).setOrigin(0.5);
 
         // Fade-in

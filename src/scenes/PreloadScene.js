@@ -40,7 +40,7 @@ export default class PreloadScene extends Phaser.Scene {
         this.add.rectangle(0, 0, width, height, 0x0d1117).setOrigin(0, 0);
 
         const barBg = this.add.rectangle(width / 2, height / 2, 400, 22, 0x222222);
-        const bar   = this.add.rectangle(width / 2 - 200, height / 2, 0, 22, 0x00cc66)
+        const bar = this.add.rectangle(width / 2 - 200, height / 2, 0, 22, 0x00cc66)
             .setOrigin(0, 0.5);
 
         this.add.text(width / 2, height / 2 - 48, '🎮 Cargando…', {
@@ -58,6 +58,7 @@ export default class PreloadScene extends Phaser.Scene {
 
         // ── Mapas ─────────────────────────────────────────────
         this.load.tilemapTiledJSON('map1', 'assets/maps/mapa1.json');
+        this.load.tilemapTiledJSON('map2', 'assets/maps/mapa2.json');
         this.load.tilemapTiledJSON('map3', 'assets/maps/mapa3.json');
 
         // ── Tileset ───────────────────────────────────────────
@@ -67,6 +68,10 @@ export default class PreloadScene extends Phaser.Scene {
             'assets/tiles/spritesheet-tiles-default.png',
             { frameWidth: 64, frameHeight: 64, spacing: 1, margin: 0 }
         );
+        //Fond
+        // ── Fondo Espacial ─────────────────────────────────────────
+        this.load.image('fondoEspacio', 'assets/background/fondo-espacio.png');
+        this.load.image('fondo2', 'assets/background/fondo-2.png');
 
         // ── Personaje ─────────────────────────────────────────
         this.load.atlasXML(
