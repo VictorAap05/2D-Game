@@ -1,10 +1,10 @@
-import Phaser            from 'phaser';
-import AudioManager      from '../managers/AudioManager.js';
-import EnemyManager      from '../managers/EnemyManager.js';
-import HUDManager        from '../managers/HUDManager.js';
+import Phaser from 'phaser';
+import AudioManager from '../managers/AudioManager.js';
+import EnemyManager from '../managers/EnemyManager.js';
+import HUDManager from '../managers/HUDManager.js';
 import ProjectileManager from '../managers/ProjectileManager.js';
-import ScoreManager      from '../managers/ScoreManager.js';
-import StorageManager    from '../managers/StorageManager.js';
+import ScoreManager from '../managers/ScoreManager.js';
+import StorageManager from '../managers/StorageManager.js';
 import { PhysicsConstants } from '../physics/PhysicsHelper.js';
 
 /**
@@ -45,9 +45,9 @@ export default class BaseScene extends Phaser.Scene {
         this.createCheckpoints();
 
         // 4. Managers de sistemas
-        this._audio      = new AudioManager(this);
+        this._audio = new AudioManager(this);
         this._projectile = new ProjectileManager(this, this.layer, this._audio);
-        this._enemy      = new EnemyManager(
+        this._enemy = new EnemyManager(
             this, this.map, this.player,
             this._projectile.getGroup(), this.layer, this._audio
         );
@@ -123,7 +123,7 @@ export default class BaseScene extends Phaser.Scene {
         this.scene.pause();
         this.scene.launch('PauseScene', {
             fromLevel: this.scene.key,
-            audio:     this._audio
+            audio: this._audio
         });
     }
 
@@ -132,7 +132,7 @@ export default class BaseScene extends Phaser.Scene {
     // ═══════════════════════════════════════════════════════════
 
     createMap() {
-        const map     = this.make.tilemap({ key: this.mapKey });
+        const map = this.make.tilemap({ key: this.mapKey });
         const tileset = map.addTilesetImage('tileset', 'tiles');
 
         const layerName = map.layers.find(l => l.name === 'Piso')
@@ -143,7 +143,7 @@ export default class BaseScene extends Phaser.Scene {
         layer.setCollisionByProperty({ collides: true });
 
         this.layer = layer;
-        this.map   = map;
+        this.map = map;
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -167,9 +167,9 @@ export default class BaseScene extends Phaser.Scene {
             PhysicsConstants.MAX_VELOCITY
         );
 
-        this.player.lives     = 3;
-        this.player.score     = 0;
-        this.player.isDead    = false;
+        this.player.lives = 3;
+        this.player.score = 0;
+        this.player.isDead = false;
         this.player.onBooster = false;
     }
 
@@ -196,11 +196,11 @@ export default class BaseScene extends Phaser.Scene {
     // ═══════════════════════════════════════════════════════════
 
     setupInput() {
-        this.cursors  = this.input.keyboard.createCursorKeys();
-        this.wasd     = this.input.keyboard.addKeys({
-            up:    Phaser.Input.Keyboard.KeyCodes.W,
-            down:  Phaser.Input.Keyboard.KeyCodes.S,
-            left:  Phaser.Input.Keyboard.KeyCodes.A,
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.wasd = this.input.keyboard.addKeys({
+            up: Phaser.Input.Keyboard.KeyCodes.W,
+            down: Phaser.Input.Keyboard.KeyCodes.S,
+            left: Phaser.Input.Keyboard.KeyCodes.A,
             right: Phaser.Input.Keyboard.KeyCodes.D
         });
         this.spaceBar = this.input.keyboard.addKey(
@@ -216,8 +216,8 @@ export default class BaseScene extends Phaser.Scene {
         if (this.anims.exists('idle')) return;
 
         this.anims.create({
-            key:       'idle',
-            frames:    [{ key: 'characters', frame: 'character_green_idle' }],
+            key: 'idle',
+            frames: [{ key: 'characters', frame: 'character_green_idle' }],
             frameRate: 1, repeat: -1
         });
         this.anims.create({
@@ -229,8 +229,8 @@ export default class BaseScene extends Phaser.Scene {
             frameRate: 6, repeat: -1
         });
         this.anims.create({
-            key:       'jump',
-            frames:    [{ key: 'characters', frame: 'character_green_jump' }],
+            key: 'jump',
+            frames: [{ key: 'characters', frame: 'character_green_jump' }],
             frameRate: 1
         });
     }
@@ -242,11 +242,11 @@ export default class BaseScene extends Phaser.Scene {
     handlePlayerMovement() {
         if (this.player.isDead) return;
 
-        const touch   = this._hud?.getTouchInput() ?? {};
-        const speed   = PhysicsConstants.PLAYER_SPEED;
-        const goLeft  = this.cursors.left.isDown  || this.wasd.left.isDown  || touch.left;
+        const touch = this._hud?.getTouchInput() ?? {};
+        const speed = PhysicsConstants.PLAYER_SPEED;
+        const goLeft = this.cursors.left.isDown || this.wasd.left.isDown || touch.left;
         const goRight = this.cursors.right.isDown || this.wasd.right.isDown || touch.right;
-        const goJump  = this.cursors.up.isDown    || this.wasd.up.isDown    || touch.jump;
+        const goJump = this.cursors.up.isDown || this.wasd.up.isDown || touch.jump;
         const goShoot = Phaser.Input.Keyboard.JustDown(this.spaceBar) || touch.shoot;
 
         if (goShoot) {
@@ -290,7 +290,7 @@ export default class BaseScene extends Phaser.Scene {
         if (this.player.isDead) return;
         const tile = this.layer.getTileAtWorldXY(this.player.x, this.player.y);
         if (!tile) return;
-        if (tile.properties.kill)   this.killPlayer();
+        if (tile.properties.kill) this.killPlayer();
         if (tile.properties.forceY) this.player.setVelocityY(tile.properties.forceY);
     }
 
@@ -325,17 +325,17 @@ export default class BaseScene extends Phaser.Scene {
         const firstgid = this.map.tilesets[0]?.firstgid ?? 1;
 
         bombLayer.objects.forEach(obj => {
-            const frame    = (obj.gid ?? 22) - firstgid;
+            const frame = (obj.gid ?? 22) - firstgid;
             const tileProps = this.getTileProperties(obj.gid);
-            const cx = obj.x + obj.width  / 2;
+            const cx = obj.x + obj.width / 2;
             const cy = obj.y - obj.height / 2;
 
             const bomb = this.bombs.create(cx, cy, 'tiles-sheet', frame);
             bomb.setScale(0.9);
-            bomb.activated       = false;
-            bomb.exploded        = false;
+            bomb.activated = false;
+            bomb.exploded = false;
             bomb.explosionRadius = tileProps?.explosionRadius ?? PhysicsConstants.EXPLOSION_RADIUS;
-            bomb.explosionDelay  = tileProps?.explosionDelay  ?? 2000;
+            bomb.explosionDelay = tileProps?.explosionDelay ?? 2000;
             bomb.refreshBody();
 
             bomb.countdownText = this.add.text(cx, cy - 48, '', {
@@ -352,7 +352,7 @@ export default class BaseScene extends Phaser.Scene {
         bomb.activated = true;
 
         const totalMs = bomb.explosionDelay;
-        const steps   = Math.max(1, Math.floor(totalMs / 1000));
+        const steps = Math.max(1, Math.floor(totalMs / 1000));
 
         this.tweens.add({
             targets: bomb, alpha: 0.2,
@@ -388,9 +388,9 @@ export default class BaseScene extends Phaser.Scene {
 
         this.tweens.add({
             targets: circle,
-            scaleX:  bomb.explosionRadius / 20,
-            scaleY:  bomb.explosionRadius / 20,
-            alpha:   0,
+            scaleX: bomb.explosionRadius / 20,
+            scaleY: bomb.explosionRadius / 20,
+            alpha: 0,
             duration: 450, ease: 'Power2',
             onComplete: () => circle.destroy()
         });
@@ -420,13 +420,13 @@ export default class BaseScene extends Phaser.Scene {
 
         spikeLayer.objects.forEach(obj => {
             const frame = (obj.gid ?? 121) - firstgid;
-            const cx    = obj.x + obj.width  / 2;
-            const cy    = obj.y - obj.height / 2;
+            const cx = obj.x + obj.width / 2;
+            const cy = obj.y - obj.height / 2;
 
             const spike = this.spikes.create(cx, cy, 'tiles-sheet', frame);
             spike.body.setCircle(24, 8, 8);
 
-            const props    = this.getTileProperties(obj.gid);
+            const props = this.getTileProperties(obj.gid);
             spike.isLethal = props?.kill ?? true;
 
             this.tweens.add({
@@ -452,16 +452,16 @@ export default class BaseScene extends Phaser.Scene {
         const coinLayer = this.map.getObjectLayer('Monedas');
         if (!coinLayer) return;
 
-        this.coins          = this.physics.add.staticGroup();
-        this.totalCoins     = coinLayer.objects.length;
+        this.coins = this.physics.add.staticGroup();
+        this.totalCoins = coinLayer.objects.length;
         this.collectedCoins = 0;
 
         const firstgid = this.map.tilesets[0]?.firstgid ?? 1;
 
         coinLayer.objects.forEach(obj => {
             const frame = (obj.gid ?? 37) - firstgid;
-            const cx    = obj.x + obj.width  / 2;
-            const cy    = obj.y - obj.height / 2;
+            const cx = obj.x + obj.width / 2;
+            const cy = obj.y - obj.height / 2;
 
             const coin = this.coins.create(cx, cy, 'tiles-sheet', frame);
             coin.setScale(0.8);
@@ -475,7 +475,7 @@ export default class BaseScene extends Phaser.Scene {
             });
 
             const props = this.getTileProperties(obj.gid);
-            coin.value  = props?.valor ?? 10;
+            coin.value = props?.valor ?? 10;
         });
 
         this.physics.add.overlap(this.player, this.coins, this._collectCoin, null, this);
@@ -483,7 +483,7 @@ export default class BaseScene extends Phaser.Scene {
 
     _collectCoin(player, coin) {
         if (coin.collected) return;
-        coin.collected   = true;
+        coin.collected = true;
         this.collectedCoins++;
         coin.body.enable = false;
 
@@ -512,8 +512,8 @@ export default class BaseScene extends Phaser.Scene {
 
         goalLayer.objects.forEach(obj => {
             const frame = (obj.gid ?? 45) - firstgid;
-            const cx    = obj.x + obj.width  / 2;
-            const cy    = obj.y - obj.height / 2;
+            const cx = obj.x + obj.width / 2;
+            const cy = obj.y - obj.height / 2;
 
             const goal = this.goals.create(cx, cy, 'tiles-sheet', frame);
             goal.refreshBody();
@@ -540,9 +540,9 @@ export default class BaseScene extends Phaser.Scene {
 
             const txt = this.add.text(goal.x, goal.y - 50,
                 `¡Faltan ${faltan} monedas!`, {
-                    fontSize: '18px', fontStyle: 'bold',
-                    color: '#ff3333', stroke: '#000000', strokeThickness: 4
-                }
+                fontSize: '18px', fontStyle: 'bold',
+                color: '#ff3333', stroke: '#000000', strokeThickness: 4
+            }
             ).setOrigin(0.5).setDepth(20);
 
             this._hud?.ignoreOnUICamera(txt);
@@ -557,7 +557,41 @@ export default class BaseScene extends Phaser.Scene {
             });
         }
     }
+    // ─────────────────────────────────────────
+    // FONDO (Background)
+    // ─────────────────────────────────────────
+    createBackground() {
+        const w = this.scale.width;
+        const h = this.scale.height;
 
+        // Colocamos la imagen que cargamos en el centro de la pantalla
+        this.bg = this.add.image(w / 2, h / 2, 'fondoEspacio');
+
+        // Lo mandamos al fondo de todo (detrás del mapa)
+        this.bg.setDepth(-10);
+
+        // Estiramos la imagen para que cubra toda tu pantalla perfectamente
+        this.bg.setDisplaySize(w, h);
+
+        // EFECTO PARALLAX: 0 hace que se quede fija como fondo de pantalla
+        this.bg.setScrollFactor(0);
+    }
+        createBackground2() {
+        const w = this.scale.width;
+        const h = this.scale.height;
+
+        // Colocamos la imagen que cargamos en el centro de la pantalla
+        this.bg = this.add.image(w / 2, h / 2, 'fondo2');
+
+        // Lo mandamos al fondo de todo (detrás del mapa)
+        this.bg.setDepth(-10);
+
+        // Estiramos la imagen para que cubra toda tu pantalla perfectamente
+        this.bg.setDisplaySize(w, h);
+
+        // EFECTO PARALLAX: 0 hace que se quede fija como fondo de pantalla
+        this.bg.setScrollFactor(0);
+    }
     // ═══════════════════════════════════════════════════════════
     // IMPULSOR
     // ═══════════════════════════════════════════════════════════
@@ -570,10 +604,10 @@ export default class BaseScene extends Phaser.Scene {
         const firstgid = this.map.tilesets[0]?.firstgid ?? 1;
 
         boostLayer.objects.forEach(obj => {
-            const frame  = (obj.gid ?? 128) - firstgid;
-            const cx     = obj.x + obj.width  / 2;
-            const cy     = obj.y - obj.height / 2;
-            const props  = this.getTileProperties(obj.gid);
+            const frame = (obj.gid ?? 128) - firstgid;
+            const cx = obj.x + obj.width / 2;
+            const cy = obj.y - obj.height / 2;
+            const props = this.getTileProperties(obj.gid);
 
             const booster = this.boosters.create(cx, cy, 'tiles-sheet', frame);
             booster.forceY = props?.forceY ?? -700;
@@ -624,13 +658,13 @@ export default class BaseScene extends Phaser.Scene {
         if (!cpLayer) return;
 
         this.checkpoints = this.physics.add.staticGroup();
-        const firstgid   = this.map.tilesets[0]?.firstgid ?? 1;
+        const firstgid = this.map.tilesets[0]?.firstgid ?? 1;
 
         cpLayer.objects.forEach(obj => {
-            const frame  = (obj.gid ?? 131) - firstgid;
-            const cx     = obj.x + obj.width  / 2;
-            const cy     = obj.y - obj.height / 2;
-            const props  = this.getTileProperties(obj.gid);
+            const frame = (obj.gid ?? 131) - firstgid;
+            const cx = obj.x + obj.width / 2;
+            const cy = obj.y - obj.height / 2;
+            const props = this.getTileProperties(obj.gid);
             const isGoal = props?.type === 'goal';
 
             const cp = this.checkpoints.create(cx, cy, 'tiles-sheet', frame);
@@ -742,8 +776,8 @@ export default class BaseScene extends Phaser.Scene {
             } else {
                 StorageManager.saveHighScore(this.player.score);
                 this.scene.launch('GameOverScene', {
-                    level:     this.scene.key,
-                    score:     this.player.score,
+                    level: this.scene.key,
+                    score: this.player.score,
                     highScore: StorageManager.getHighScore()
                 });
                 this.scene.pause();
@@ -759,7 +793,7 @@ export default class BaseScene extends Phaser.Scene {
         const tileset = this.map.tilesets[0];
         if (!tileset) return null;
 
-        const localId  = gid - tileset.firstgid;
+        const localId = gid - tileset.firstgid;
         const tileData = tileset.tileData[localId];
         if (!tileData || !tileData.properties) return null;
 
