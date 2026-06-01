@@ -11,7 +11,7 @@ export default class PauseScene extends Phaser.Scene {
     }
 
 create() {
-        // ── ¡AQUÍ ESTÁ LA SOLUCIÓN! ──
+        
         // Obliga a la escena de Pausa a renderizarse por encima de cualquier otro nivel o fondo
         this.scene.bringToTop();
 
