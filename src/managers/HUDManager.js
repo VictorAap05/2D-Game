@@ -1,12 +1,14 @@
+import Phaser from 'phaser';
+
 /**
  * HUDManager — v2
  *
  * Mejoras:
- *  - Timer de nivel visible en pantalla
- *  - Botón de pausa táctil (para móvil)
- *  - Layout mejorado en pantallas pequeñas (safe-area / notch)
- *  - Indicador de combo
- *  - Resize más robusto (reposiciona TODOS los elementos)
+ * - Timer de nivel visible en pantalla
+ * - Botón de pausa táctil (para móvil)
+ * - Layout mejorado en pantallas pequeñas (safe-area / notch)
+ * - Indicador de combo
+ * - Resize más robusto (reposiciona TODOS los elementos)
  */
 export default class HUDManager {
 
@@ -154,25 +156,21 @@ export default class HUDManager {
     // ═══════════════════════════════════════════════════════════
 
     _createMobileControls() {
+        if (!this.scene.sys.game.device.os.android && !this.scene.sys.game.device.os.iOS) {
+            return; 
+        }
+
         const { width, height } = this.scene.scale;
-
-        const style = {
-            fontSize:        '30px',
-            color:           '#ffffff',
-            backgroundColor: '#00000055',
-            padding:         { x: 18, y: 12 },
-            stroke:          '#000000',
-            strokeThickness:  3
-        };
-
+        const btnRadius = 40;
         const btnY = height - 80;
 
         // Izquierda
-        const LEFT  = this._addTouchBtn(60,       btnY, '◀', style);
-        const RIGHT = this._addTouchBtn(140,      btnY, '▶', style);
+        const LEFT  = this._addTouchBtn(80,  btnY, '◀', btnRadius);
+        const RIGHT = this._addTouchBtn(180, btnY, '▶', btnRadius);
+        
         // Derecha
-        const SHOOT = this._addTouchBtn(width - 140, btnY, '🔥', style);
-        const JUMP  = this._addTouchBtn(width - 60,  btnY, '▲', style);
+        const SHOOT = this._addTouchBtn(width - 180, btnY, '🔥', btnRadius);
+        const JUMP  = this._addTouchBtn(width - 80,  btnY, '▲', btnRadius);
 
         this._bindTouch(LEFT,  'left');
         this._bindTouch(RIGHT, 'right');
@@ -180,23 +178,46 @@ export default class HUDManager {
         this._bindTouch(SHOOT, 'shoot');
 
         this._touchEls = [LEFT, RIGHT, JUMP, SHOOT];
-        this._uiElements.push(...this._touchEls);
-        this.scene.cameras.main.ignore(this._touchEls);
     }
 
-    _addTouchBtn(x, y, label, style) {
-        return this.scene.add.text(x, y, label, style)
-            .setScrollFactor(0)
-            .setDepth(60)
-            .setAlpha(0.75)
+    _addTouchBtn(x, y, label, radius) {
+        const container = this.scene.add.container(x, y).setScrollFactor(0).setDepth(60).setAlpha(0.5);
+        
+        const bg = this.scene.add.circle(0, 0, radius, 0x000000, 0.6)
+            .setStrokeStyle(3, 0xffffff, 0.8)
             .setInteractive({ useHandCursor: true });
+            
+        const txt = this.scene.add.text(0, 0, label, { 
+            fontSize: '32px', color: '#ffffff' 
+        }).setOrigin(0.5);
+
+        container.add([bg, txt]);
+        this._uiElements.push(container, bg, txt);
+        this.scene.cameras.main.ignore([container, bg, txt]);
+
+        bg.on('pointerdown', () => {
+            container.setAlpha(0.9);
+            container.setScale(0.9);
+            bg.setFillStyle(0x00ff88, 0.4);
+        });
+
+        const resetBtn = () => {
+            container.setAlpha(0.5);
+            container.setScale(1);
+            bg.setFillStyle(0x000000, 0.6);
+        };
+        bg.on('pointerup', resetBtn);
+        bg.on('pointerout', resetBtn);
+
+        container.interactable = bg; 
+        return container;
     }
 
-    _bindTouch(btn, key) {
-        btn.on('pointerdown',  () => { this._touchButtons[key] = true;  });
-        btn.on('pointerup',    () => { this._touchButtons[key] = false; });
-        btn.on('pointerout',   () => { this._touchButtons[key] = false; });
-        btn.on('pointercancel',() => { this._touchButtons[key] = false; });
+    _bindTouch(container, key) {
+        container.interactable.on('pointerdown',  () => { this._touchButtons[key] = true;  });
+        container.interactable.on('pointerup',    () => { this._touchButtons[key] = false; });
+        container.interactable.on('pointerout',   () => { this._touchButtons[key] = false; });
+        container.interactable.on('pointercancel',() => { this._touchButtons[key] = false; });
     }
 
     getTouchInput() { return this._touchButtons; }
@@ -229,10 +250,10 @@ export default class HUDManager {
         // Reposicionar controles táctiles
         const btnY = height - 80;
         if (this._touchEls.length >= 4) {
-            this._touchEls[0].setPosition(60,       btnY);
-            this._touchEls[1].setPosition(140,      btnY);
-            this._touchEls[2].setPosition(width - 60,  btnY);
-            this._touchEls[3].setPosition(width - 140, btnY);
+            this._touchEls[0].setPosition(80, btnY);
+            this._touchEls[1].setPosition(180, btnY);
+            this._touchEls[2].setPosition(width - 80, btnY);
+            this._touchEls[3].setPosition(width - 180, btnY);
         }
     }
 
