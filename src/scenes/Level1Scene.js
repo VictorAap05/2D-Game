@@ -1,78 +1,89 @@
-import BaseScene from './BaseScene';
+import BaseScene from './BaseScene.js';
 
-/*
-=============================================
-NIVEL 1
-Extiende BaseScene — aquí va la lógica
-específica del nivel 1.
-
-Tu compañero solo necesita:
-  1. Ajustar this.mapKey si usa otro mapa
-  2. Ajustar this.spawnX / this.spawnY
-  3. Agregar lógica propia en create() y update()
-     llamando a super.create() y super.update()
-=============================================
-*/
+/**
+ * Level1Scene
+ * Nivel introductorio con plataformas básicas.
+ * Mapa simple (mapa1) sin object layers — la condición de victoria
+ * es que el jugador llegue al borde derecho del mapa.
+ */
 export default class Level1Scene extends BaseScene {
 
     constructor() {
         super('Level1Scene');
         this.mapKey    = 'map1';
         this.levelName = 'Level1Scene';
+        this.levelNum  = 1;
+        this.nextLevel = 'Level3Scene';
         this.spawnX    = 100;
         this.spawnY    = 300;
     }
 
     create() {
+        super.create();
 
-        /*
-        =====================================
-        MAPA, JUGADOR Y SISTEMAS BASE
-        =====================================
-        */
+        // En este mapa no hay monedas, marcamos como completado desde el inicio
+        // para que si existe la meta, funcione sin restricción de monedas
+        this.totalCoins     = 0;
+        this.collectedCoins = 0;
 
-        this.createMap();
-        this.createPlayer();
+        // Zona de victoria invisible al final del mapa (10% antes del borde derecho)
+        this._createFinishZone();
 
-        this.physics.add.collider(this.player, this.layer);
-
-        this.createBombs();
-
-        if (this.bombs) {
-            this.physics.add.overlap(
-                this.player,
-                this.bombs,
-                this.activateBomb,
-                null,
-                this
-            );
-        }
-
-        this.setupCamera();
-        this.setupInput();
-        this.createAnimations();
-        this.createHUD();
-
-        /*
-        =====================================
-        TODO: agregar lógica propia del nivel 1
-        (enemigos, coleccionables, meta, etc.)
-        =====================================
-        */
-
-        // Fade-in al entrar al nivel
-        this.cameras.main.fadeIn(500, 0, 0, 0);
+        // Pequeño mensaje de instrucciones
+        this._showInstructions();
     }
 
     update() {
+        super.update();
+    }
 
-        this.handlePlayerMovement();
-        this.handleTileEffects();
+    // ─────────────────────────────────────────────────────────
+    // ZONA DE VICTORIA
+    // ─────────────────────────────────────────────────────────
 
-        /*
-        =====================================
-        TODO: lógica extra del nivel 1
-        =====================================
-        */
+    _createFinishZone() {
+        const mapW = this.map.widthInPixels;
+        const mapH = this.map.heightInPixels;
+
+        // Zona estrecha en el borde derecho
+        const zone = this.add.zone(mapW - 40, mapH / 2, 80, mapH).setOrigin(0.5);
+        this.physics.add.existing(zone, true); // estática
+
+        this.physics.add.overlap(this.player, zone, () => {
+            if (!this.player.isDead) this.onLevelComplete();
+        });
+
+        // Indicador visual de meta (bandera)
+        const flag = this.add.text(mapW - 60, mapH / 2 - 60, '🏁', {
+            fontSize: '48px'
+        }).setDepth(5);
+
+        this.tweens.add({
+            targets: flag, y: flag.y - 12,
+            duration: 700, yoyo: true, repeat: -1,
+            ease: 'Sine.easeInOut'
+        });
+
+        if (this._hud) {
+            this._hud.ignoreOnUICamera(flag);
+        }
+    }
+
+    _showInstructions() {
+        const txt = this.add.text(this.spawnX + 20, this.spawnY - 80,
+            '← → Mover   W/↑ Saltar   ESPACIO Disparar', {
+                fontSize: '14px', color: '#ffffff',
+                stroke: '#000000', strokeThickness: 3
+            }
+        ).setDepth(15);
+
+        if (this._hud) this._hud.ignoreOnUICamera(txt);
+
+        this.time.delayedCall(4000, () => {
+            this.tweens.add({
+                targets: txt, alpha: 0, duration: 800,
+                onComplete: () => txt.destroy()
+            });
+        });
     }
 }
